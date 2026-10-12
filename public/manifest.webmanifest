@@ -1,0 +1,10 @@
+{
+  "name": "Game Jam Mentor",
+  "short_name": "GJ Mentor",
+  "description": "Registre mentorias e avaliações de Direção de Arte.",
+  "start_url": "/equipes",
+  "display": "standalone",
+  "background_color": "#f8f7f2",
+  "theme_color": "#557a68",
+  "lang": "pt-BR"
+}
