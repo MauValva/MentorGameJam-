@@ -1,5 +1,5 @@
 type IconProps = { size?: number; stroke?: number };
-type IconName = "search" | "plus" | "users" | "check" | "alert" | "arrow" | "gear" | "star" | "back" | "edit" | "clock";
+type IconName = "search" | "plus" | "users" | "check" | "alert" | "arrow" | "gear" | "star" | "back" | "edit" | "clock" | "trash";
 
 export function Icon({ name, size = 20, stroke = 1.8 }: IconProps & { name: IconName }) {
   const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: stroke, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
@@ -15,6 +15,7 @@ export function Icon({ name, size = 20, stroke = 1.8 }: IconProps & { name: Icon
     back: <><path d="m15 18-6-6 6-6" /></>,
     edit: <><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" /></>,
     clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
+    trash: <><path d="M4 7h16" /><path d="M10 11v6M14 11v6" /><path d="M6 7l1 14h10l1-14" /><path d="M9 7V4h6v3" /></>,
   };
   return <svg {...common}>{paths[name]}</svg>;
 }
