@@ -3,6 +3,7 @@ export type DatabaseTeam = {
   name: string;
   game_name: string;
   engine: string | null;
+  current_state: string | null;
   description: string | null;
   general_notes: string | null;
   theme_id: string;
@@ -19,6 +20,7 @@ export type Team = {
   game: string;
   theme: string;
   engine: string;
+  currentState?: string;
   members: number;
   visits: number;
   revisit?: string;
