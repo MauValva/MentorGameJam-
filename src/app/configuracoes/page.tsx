@@ -1,4 +1,5 @@
 "use client";
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AppFrame } from "@/components/app-frame";
@@ -6,4 +7,34 @@ import { Icon } from "@/components/icons";
 import { createClient } from "@/lib/supabase/client";
 
 type Summary = { jam: string; themes: number; mentors: number; criteria: number; email: string };
-export default function SettingsPage() { const [summary, setSummary] = useState<Summary | null>(null); const [error, setError] = useState(""); useEffect(() => { const load = async () => { const client = createClient(); const { data: { user } } = await client.auth.getUser(); const { data: mentor } = await client.from("mentors").select("jam_id,name,email").eq("user_id", user?.id ?? "").limit(1).single(); if (!mentor) { setError("Seu usuário ainda não está associado a uma Game Jam."); return; } const [{ data: jam }, { count: themes }, { count: mentors }, { count: criteria }] = await Promise.all([client.from("jams").select("name").eq("id", mentor.jam_id).single(), client.from("themes").select("id", { count: "exact", head: true }).eq("jam_id", mentor.jam_id), client.from("mentors").select("id", { count: "exact", head: true }).eq("jam_id", mentor.jam_id), client.from("evaluation_criteria").select("id", { count: "exact", head: true }).eq("jam_id", mentor.jam_id)]); setSummary({ jam: jam?.name ?? "", themes: themes ?? 0, mentors: mentors ?? 0, criteria: criteria ?? 0, email: mentor.email }); }; void load().catch(() => setError("Não foi possível carregar as configurações.")); }, []); const items = [{ title: "Game Jam", description: summary?.jam || "Não cadastrada", href: "/configuracoes/jam" }, { title: "Temas", description: `${summary?.themes ?? 0} cadastrados`, href: "/configuracoes/temas" }, { title: "Mentores", description: `${summary?.mentors ?? 0} associados`, href: "/configuracoes/mentores" }, { title: "Critérios de avaliação", description: `${summary?.criteria ?? 0} cadastrados`, href: "/configuracoes/criterios" }]; return <AppFrame active="settings"><header className="mb-8"><p className="mb-2 text-xs font-bold uppercase tracking-[.18em] text-moss">Workspace</p><h1 className="font-serif text-[32px] font-bold leading-none tracking-[-.04em]">Configurações</h1></header>{error && <p className="mb-4 rounded-xl bg-[#f8e4df] p-3 text-sm text-[#974b3c]">{error}</p>}<div className="space-y-3">{items.map((item) => <Link key={item.title} href={item.href} className="flex min-h-[78px] items-center gap-4 rounded-[22px] border border-[#e1e6de] bg-white px-4 shadow-card"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#edf2e9] text-moss"><Icon name={item.title === "Game Jam" ? "star" : item.title === "Mentores" ? "users" : "gear"} size={20} /></div><div className="min-w-0 flex-1"><h2 className="font-bold">{item.title}</h2><p className="mt-1 truncate text-xs text-[#81908b]">{item.description}</p></div><Icon name="arrow" size={18} /></Link>)}</div>{summary && <div className="mt-8 rounded-[22px] border border-dashed border-[#cbd7ca] p-5"><p className="text-xs font-bold uppercase tracking-[.15em] text-moss">Sessão atual</p><p className="mt-2 text-sm font-bold">{summary.email}</p></div>}</AppFrame>; }
+
+export default function SettingsPage() {
+  const [summary, setSummary] = useState<Summary | null>(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const load = async () => {
+      const client = createClient();
+      const { data: { user } } = await client.auth.getUser();
+      const { data: mentor } = await client.from("mentors").select("jam_id,name,email").eq("user_id", user?.id ?? "").limit(1).single();
+      if (!mentor) { setError("Seu usuário ainda não está associado a uma Game Jam."); return; }
+      const [{ data: jam }, { count: themes }, { count: mentors }, { count: criteria }] = await Promise.all([
+        client.from("jams").select("name").eq("id", mentor.jam_id).single(),
+        client.from("themes").select("id", { count: "exact", head: true }).eq("jam_id", mentor.jam_id),
+        client.from("mentors").select("id", { count: "exact", head: true }).eq("jam_id", mentor.jam_id),
+        client.from("evaluation_criteria").select("id", { count: "exact", head: true }).eq("jam_id", mentor.jam_id),
+      ]);
+      setSummary({ jam: jam?.name ?? "", themes: themes ?? 0, mentors: mentors ?? 0, criteria: criteria ?? 0, email: mentor.email });
+    };
+    void load().catch(() => setError("Não foi possível carregar as configurações."));
+  }, []);
+
+  const items = [
+    { title: "Game Jam", description: summary?.jam || "Não cadastrada", href: "/configuracoes/jam", icon: "star" as const },
+    { title: "Temas", description: `${summary?.themes ?? 0} cadastrados`, href: "/configuracoes/temas", icon: "palette" as const },
+    { title: "Mentores", description: `${summary?.mentors ?? 0} associados`, href: "/configuracoes/mentores", icon: "users" as const },
+    { title: "Critérios de avaliação", description: `${summary?.criteria ?? 0} cadastrados`, href: "/configuracoes/criterios", icon: "checklist" as const },
+  ];
+
+  return <AppFrame active="settings"><header className="mb-8"><p className="mb-2 text-xs font-bold uppercase tracking-[.18em] text-moss">Workspace</p><h1 className="font-serif text-[32px] font-bold leading-none tracking-[-.04em]">Configurações</h1></header>{error && <p className="mb-4 rounded-xl bg-[#f8e4df] p-3 text-sm text-[#974b3c]">{error}</p>}<div className="space-y-3">{items.map((item) => <Link key={item.title} href={item.href} className="flex min-h-[78px] items-center gap-4 rounded-[22px] border border-[#e1e6de] bg-white px-4 shadow-card"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#edf2e9] text-moss"><Icon name={item.icon} size={20} /></div><div className="min-w-0 flex-1"><h2 className="font-bold">{item.title}</h2><p className="mt-1 truncate text-xs text-[#81908b]">{item.description}</p></div><Icon name="arrow" size={18} /></Link>)}</div>{summary && <div className="mt-8 rounded-[22px] border border-dashed border-[#cbd7ca] p-5"><p className="text-xs font-bold uppercase tracking-[.15em] text-moss">Sessão atual</p><p className="mt-2 text-sm font-bold">{summary.email}</p></div>}</AppFrame>;
+}
